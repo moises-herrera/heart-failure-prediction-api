@@ -5,7 +5,7 @@ from utils.process_dataset import process_dataset
 from database.database import get_database
 from services.patients_service import get_patients_service
 from services.statistics_service import get_statistics_service
-from ai_models.heart_disease_classifier import get_classifier
+from services.heart_disease_classifier import get_classifier
 import pandas as pd
 from dotenv import load_dotenv
 from utils.api_utils import parse_filters, validate_patient_data

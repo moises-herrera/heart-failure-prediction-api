@@ -1,4 +1,5 @@
 import os
+import pickle
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler, LabelEncoder
@@ -16,8 +17,13 @@ import seaborn as sns
 
 
 class HeartDiseaseClassifier:
-    def __init__(self, dataset_path: str):
+    def __init__(
+        self,
+        dataset_path: str,
+        model_path: str = "ai_models/heart_disease_model.pkl",
+    ):
         self.dataset_path = dataset_path
+        self.model_path = model_path
         self.df = None
         self.X_train = None
         self.X_test = None
@@ -115,6 +121,37 @@ class HeartDiseaseClassifier:
 
         plt.savefig("results/confusion_matrix.png")
 
+    def save_model(self):
+        model_dir = os.path.dirname(self.model_path)
+        if not os.path.exists(model_dir):
+            os.makedirs(model_dir)
+
+        model_data = {
+            "model": self.model,
+            "scaler": self.scaler,
+            "label_encoders": self.label_encoders,
+            "results": self.results,
+        }
+
+        with open(self.model_path, "wb") as f:
+            pickle.dump(model_data, f)
+
+        print(f"\nModelo guardado exitosamente en: {self.model_path}")
+
+    def load_model(self):
+        if not os.path.exists(self.model_path):
+            raise FileNotFoundError(f"No se encontró el modelo en: {self.model_path}")
+
+        with open(self.model_path, "rb") as f:
+            model_data = pickle.load(f)
+
+        self.model = model_data["model"]
+        self.scaler = model_data["scaler"]
+        self.label_encoders = model_data["label_encoders"]
+        self.results = model_data.get("results", {})
+
+        print(f"\nModelo cargado exitosamente desde: {self.model_path}")
+
     def predict(self, input_data: pd.DataFrame):
         for col, le in self.label_encoders.items():
             if col in input_data.columns:
@@ -125,12 +162,25 @@ class HeartDiseaseClassifier:
         return predictions
 
 
-def get_classifier():
+def get_classifier(force_retrain=False) -> HeartDiseaseClassifier:
     dataset_path = "data/heart.csv"
-    classifier = HeartDiseaseClassifier(dataset_path)
+    model_path = "ai_models/heart_disease_model.pkl"
 
-    classifier.load_and_preprocess_data()
-    classifier.train_model()
-    classifier.evaluate_model()
-    classifier.display_results()
+    classifier = HeartDiseaseClassifier(dataset_path, model_path)
+
+    if os.path.exists(model_path) and not force_retrain:
+        print("\nCargando modelo existente...")
+        classifier.load_model()
+    else:
+        if force_retrain:
+            print("\nReentrenando modelo...")
+        else:
+            print("\nNo se encontró modelo guardado. Entrenando nuevo modelo...")
+
+        classifier.load_and_preprocess_data()
+        classifier.train_model()
+        classifier.evaluate_model()
+        classifier.display_results()
+        classifier.save_model()
+
     return classifier
