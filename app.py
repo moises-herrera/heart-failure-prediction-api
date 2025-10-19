@@ -210,12 +210,15 @@ def get_stats():
             avg_age:
               type: number
               description: Edad promedio
-            gender_distribution:
-              type: object
-              description: Distribución por género
-            heart_disease_rate:
+            avg_resting_bp:
               type: number
-              description: Tasa de enfermedad cardíaca
+              description: Presión arterial en reposo promedio
+            avg_cholesterol:
+              type: number
+              description: Colesterol promedio
+            avg_max_heart_rate:
+              type: number
+              description: Frecuencia cardíaca máxima promedio
       400:
         description: Parametros invalidos
         schema:

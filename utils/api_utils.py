@@ -23,7 +23,7 @@ def parse_filters(query_params):
 
 
 def validate_filters(filters):
-    valid_keys = {"Age", "Sex", "HeartDisease"}
+    valid_keys = {"age", "gender", "heart_disease"}
     for key in filters.keys():
         if key not in valid_keys:
             raise ValueError(
