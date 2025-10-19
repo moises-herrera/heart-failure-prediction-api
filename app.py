@@ -357,7 +357,7 @@ def predict():
         return jsonify({"error": str(e)}), 500
 
 
-@api_bp.post("/model-stats")
+@api_bp.get("/model-stats")
 def model_stats():
     """
     Obtener estadísticas del modelo de Machine Learning
