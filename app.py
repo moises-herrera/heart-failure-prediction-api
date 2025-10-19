@@ -357,6 +357,70 @@ def predict():
         return jsonify({"error": str(e)}), 500
 
 
+@api_bp.post("/model-stats")
+def model_stats():
+    """
+    Obtener estadísticas del modelo de Machine Learning
+    ---
+    tags:
+      - Prediction
+    responses:
+      200:
+        description: Estadísticas del modelo
+        schema:
+          type: object
+          properties:
+            accuracy:
+              type: number
+              format: float
+              description: Accuracy del modelo
+              example: 0.85
+            precision:
+              type: number
+              format: float
+              description: Precisión del modelo
+              example: 0.84
+            recall:
+              type: number
+              format: float
+              description: Recall del modelo
+              example: 0.83
+            f1_score:
+              type: number
+              format: float
+              description: F1 Score del modelo
+              example: 0.835
+            true_negatives:
+              type: integer
+              description: Verdaderos negativos
+              example: 50
+            false_positives:
+              type: integer
+              description: Falsos positivos
+              example: 10
+            false_negatives:
+              type: integer
+              description: Falsos negativos
+              example: 5
+            true_positives:
+              type: integer
+              description: Verdaderos positivos
+              example: 35
+      500:
+        description: Error en el servidor
+        schema:
+          type: object
+          properties:
+            error:
+              type: string
+    """
+    try:
+        metrics = heart_disease_classifier.get_metrics()
+        return jsonify(metrics)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 app.register_blueprint(api_bp)
 
 

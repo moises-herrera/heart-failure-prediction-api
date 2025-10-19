@@ -102,6 +102,8 @@ class HeartDiseaseClassifier:
         cm = confusion_matrix(self.y_test, self.results["y_pred"])
         print(cm)
 
+        self.results["confusion_matrix"] = cm
+
         plt.figure(figsize=(6, 4))
         sns.heatmap(
             cm,
@@ -160,6 +162,20 @@ class HeartDiseaseClassifier:
         input_data_scaled = self.scaler.transform(input_data)
         predictions = self.model.predict(input_data_scaled)
         return predictions
+    
+    def get_metrics(self):
+        cm = self.results.get("confusion_matrix")
+
+        return {
+            "accuracy": self.results.get("accuracy"),
+            "precision": self.results.get("precision"),
+            "recall": self.results.get("recall"),
+            "f1_score": self.results.get("f1_score"),
+            "true_negatives": float(cm[0][0]),
+            "false_positives": float(cm[0][1]),
+            "false_negatives": float(cm[1][0]),
+            "true_positives": float(cm[1][1]),
+        }
 
 
 def get_classifier(force_retrain=False) -> HeartDiseaseClassifier:
