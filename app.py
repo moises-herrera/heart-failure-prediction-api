@@ -8,6 +8,7 @@ from services.statistics_service import get_statistics_service
 from ai_models.heart_disease_classifier import get_classifier
 import pandas as pd
 from dotenv import load_dotenv
+from utils.api_utils import parse_filters, validate_patient_data
 
 load_dotenv()
 
@@ -145,6 +146,13 @@ def get_patients():
                 type: string
               HeartDisease:
                 type: integer
+      400:
+        description: Parametros invalidos
+        schema:
+          type: object
+          properties:
+            error:
+                type: string
       500:
         description: Error en el servidor
         schema:
@@ -157,6 +165,9 @@ def get_patients():
         filters = parse_filters(request.args)
         patients = get_patients_service(db).get_patients(filters)
         return jsonify(patients)
+    except ValueError as ve:
+        (error, status_code) = ve.args
+        return jsonify(error), status_code
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
@@ -205,6 +216,13 @@ def get_stats():
             heart_disease_rate:
               type: number
               description: Tasa de enfermedad cardíaca
+      400:
+        description: Parametros invalidos
+        schema:
+          type: object
+          properties:
+            error:
+                type: string
       500:
         description: Error en el servidor
         schema:
@@ -217,6 +235,9 @@ def get_stats():
         filters = parse_filters(request.args)
         stats = get_statistics_service(db).get_patient_statistics(filters)
         return jsonify(stats)
+    except ValueError as ve:
+        (error, status_code) = ve.args
+        return jsonify(error), status_code
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
@@ -302,6 +323,13 @@ def predict():
               type: integer
               description: Predicción de enfermedad cardíaca (0=No, 1=Sí)
               example: 0
+      400:
+        description: Datos invalidos
+        schema:
+          type: object
+          properties:
+            error:
+                type: string
       500:
         description: Error en el servidor
         schema:
@@ -312,31 +340,18 @@ def predict():
     """
     try:
         data = request.json
+        validate_patient_data(data)
+
         input_data = pd.DataFrame([data])
         input_data = input_data.sort_index(axis=1)
         predictions = heart_disease_classifier.predict(input_data)
         prediction = {"heart_disease_prediction": int(predictions[0])}
         return jsonify(prediction)
+    except ValueError as ve:
+        (error, status_code) = ve.args
+        return jsonify(error), status_code
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
-
-def parse_filters(query_params):
-    query_params = request.args
-    age = query_params.get("age")
-    gender = query_params.get("gender")
-    heart_disease = query_params.get("heart_disease")
-
-    filters = {}
-
-    if age:
-        filters["Age"] = int(age)
-    if gender:
-        filters["Sex"] = gender
-    if heart_disease:
-        filters["HeartDisease"] = int(heart_disease)
-
-    return filters
 
 
 app.register_blueprint(api_bp)

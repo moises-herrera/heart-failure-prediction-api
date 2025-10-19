@@ -11,7 +11,13 @@ class StatisticsService:
         df = pd.DataFrame(patients)
 
         if df.empty:
-            return {"message": "No hay datos que coincidan con los filtros proporcionados."}
+            return {
+                "total_patients": 0,
+                "avg_age": 0,
+                "avg_resting_bp": 0,
+                "avg_cholesterol": 0,
+                "avg_max_heart_rate": 0,
+            }
 
         stats = {
             "total_patients": len(df),
